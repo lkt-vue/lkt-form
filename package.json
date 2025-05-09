@@ -40,6 +40,7 @@
     "vue-tsc": "^2.2.0"
   },
   "peerDependencies": {
+    "lkt-data-state": "^1.0.11",
     "lkt-loader": "^1.2.0",
     "lkt-vue-kernel": "^1.0.44",
     "vue": "^3.3.0"
