@@ -1,15 +1,17 @@
-import { defineComponent as x, ref as b, watch as _, computed as m, onMounted as ee, nextTick as oe, resolveComponent as C, createBlock as f, createCommentVNode as v, openBlock as r, resolveDynamicComponent as $, mergeProps as p, withCtx as E, createElementVNode as te, createElementBlock as F, renderSlot as le, normalizeProps as H, Fragment as I, renderList as ne } from "vue";
-import { ModificationView as h, ColumnType as j, extractI18nValue as ae, setModalCanvas as ie } from "lkt-vue-kernel";
-import { DataState as de } from "lkt-data-state";
-const re = { class: "lkt-grid-1" }, ue = /* @__PURE__ */ x({
+import { defineComponent as oe, ref as g, watch as C, computed as f, onMounted as te, nextTick as le, resolveComponent as h, createBlock as s, createCommentVNode as k, openBlock as r, resolveDynamicComponent as H, mergeProps as p, withCtx as z, createElementVNode as ae, createElementBlock as B, renderSlot as ne, normalizeProps as K, Fragment as F, renderList as ie } from "vue";
+import { ModificationView as y, ColumnType as I, extractI18nValue as de, setModalCanvas as re } from "lkt-vue-kernel";
+import { DataState as ue } from "lkt-data-state";
+const fe = { class: "lkt-grid-1" }, se = /* @__PURE__ */ oe({
   __name: "LktForm",
   props: {
     modelValue: {},
     modifications: {},
     form: {},
     valid: { type: Boolean, default: !1 },
-    modificationView: { default: h.Current },
-    modificationDataState: { default: () => new de({}) }
+    disabled: { type: Boolean, default: !1 },
+    modificationView: { default: y.Current },
+    editableViews: { default: () => [] },
+    modificationDataState: { default: () => new ue({}) }
   },
   emits: [
     "update:modelValue",
@@ -17,223 +19,249 @@ const re = { class: "lkt-grid-1" }, ue = /* @__PURE__ */ x({
     "update:form",
     "update:valid"
   ],
-  setup(y, { expose: z, emit: K }) {
-    const l = y, w = K, u = b(l.modelValue), c = b(l.modifications), V = b(null), k = b(l.valid);
-    _(() => l.valid, (e) => {
-      k.value = e;
-    }), _(k, (e) => {
-      w("update:valid", e);
+  setup(b, { expose: q, emit: A }) {
+    const t = b, U = A, u = g(t.modelValue), c = g(t.modifications), V = g(null), v = g(t.valid);
+    C(() => t.valid, (e) => {
+      v.value = e;
+    }), C(v, (e) => {
+      U("update:valid", e);
     });
-    const U = () => {
-      let e = !0, t = [];
-      if (l.form) {
-        if (t = l.form.items.reduce((a, d, i) => a.concat(d.type === "form" ? i : []), []), t.length > 0)
-          for (let a in t)
-            e = e && V.value[t[a]].isValid();
+    const _ = () => {
+      let e = !0, l = [];
+      if (t.form) {
+        if (l = t.form.items.reduce((n, i, d) => n.concat(i.type === "form" ? d : []), []), l.length > 0)
+          for (let n in l)
+            e = e && V.value[l[n]].isValid();
         if (!e) {
-          k.value = e;
+          v.value = e;
           return;
         }
-        if (t = l.form.items.reduce((a, d, i) => a.concat(d.type === "field" ? i : []), []), t.length > 0)
-          for (let a in t)
-            e = e && V.value[t[a]].isFormValid();
-        k.value = e, w("update:valid", e);
+        if (l = t.form.items.reduce((n, i, d) => n.concat(i.type === "field" ? d : []), []), l.length > 0)
+          for (let n in l)
+            e = e && V.value[l[n]].isFormValid();
+        v.value = e, U("update:valid", e);
       }
     };
-    _(() => l.modelValue, (e) => {
+    C(() => t.modelValue, (e) => {
       u.value = e;
-    }), _(u, (e) => {
-      D(), w("update:modelValue", e);
-    }, { deep: !0 }), _(() => l.modifications, (e) => {
+    }), C(u, (e) => {
+      D(), U("update:modelValue", e);
+    }, { deep: !0 }), C(() => t.modifications, (e) => {
       c.value = e;
-    }), _(c, (e) => {
-      D(), w("update:modifications", e);
+    }, { deep: !0 }), C(c, (e) => {
+      D(), U("update:modifications", e);
     }, { deep: !0 });
-    const q = m(() => !k.value), M = m(() => {
+    const G = f(() => !v.value), j = f(() => {
       var e;
-      return l.form ? {
-        ...(e = l.form) == null ? void 0 : e.submitButton,
-        disabled: q.value
+      return t.form ? {
+        ...(e = t.form) == null ? void 0 : e.submitButton,
+        disabled: G.value
       } : {};
-    }), s = b([]), A = m(() => {
-      var e, t;
-      return typeof ((e = l.form) == null ? void 0 : e.header) == "object" && Object.keys((t = l.form) == null ? void 0 : t.header).length > 0;
-    }), S = b([]), G = [
+    }), m = g([]), J = f(() => {
+      var e, l;
+      return typeof ((e = t.form) == null ? void 0 : e.header) == "object" && Object.keys((l = t.form) == null ? void 0 : l.header).length > 0;
+    }), M = g([]), Q = [
       {
         key: "datum",
         label: "Datum",
-        type: j.None
+        type: I.None
       },
       {
         key: "current",
         label: "Current",
-        type: j.Field,
+        type: I.Field,
         field: "prop:field"
       },
       {
         key: "modification",
         label: "Modification",
-        type: j.Field,
+        type: I.Field,
         field: "prop:field"
       }
-    ], J = m(() => l.modificationView === h.Differences), Q = m(() => l.modificationView === h.SplitView), W = m(() => l.modificationView === h.Modifications), X = m(() => l.modificationView === h.Current), O = m(() => {
-      let e = [], t = l.modificationDataState.getChangedProperties();
-      return Q.value ? e = l.form.items.reduce((a, d, i) => a.concat(d.type === "field" ? i : []), []) : J.value && (e = l.form.items.reduce((a, d, i) => a.concat(d.type === "field" && t.includes(d.key) ? i : []), [])), D(e), e;
-    }), D = (e) => {
-      S.value = [];
-      let t = [];
+    ], W = f(() => t.modificationView === y.Differences), X = f(() => t.modificationView === y.SplitView), Y = f(() => t.modificationView === y.Modifications), Z = f(() => t.modificationView === y.Current), O = f(() => {
+      let e = [];
+      if (X.value)
+        e = t.form.items.reduce((l, n, i) => l.concat(n.type === "field" ? i : []), []);
+      else if (W.value) {
+        let l = t.modificationDataState.getChangedProperties();
+        e = t.form.items.reduce((n, i, d) => n.concat(i.type === "field" && l.includes(i.key) ? d : []), []);
+      }
+      return D(e), e;
+    }), R = f(() => !(t.editableViews.length === 0 || t.editableViews.includes(y.Current))), L = f(() => !(t.editableViews.length === 0 || t.editableViews.includes(y.Modifications))), D = (e) => {
+      M.value = [];
+      let l = [];
       if (e || (e = O.value), e.length > 0)
-        for (let a in e) {
-          let d = e[a], i = l.form.items[d];
-          t.push({
-            datum: ae(i.field.label),
-            current: u.value[i.key],
-            modification: c.value[i.key],
-            field: i.field
+        for (let n in e) {
+          let i = e[n], d = t.form.items[i];
+          l.push({
+            datum: de(d.field.label),
+            current: u.value[d.key],
+            modification: c.value[d.key],
+            field: d.field
           });
         }
-      S.value = t;
+      M.value = l;
     };
-    return z({
-      isValid: () => k.value
-    }), ee(() => {
-      oe(() => {
-        U();
-      }), w("update:valid", k.value);
-    }), (e, t) => {
-      var R, L, N;
-      const a = C("lkt-header"), d = C("lkt-field"), i = C("lkt-form", !0), Y = C("lkt-table"), Z = C("lkt-button");
-      return typeof e.form == "object" && Object.keys(e.form).length > 0 ? (r(), f($(((R = e.form.container) == null ? void 0 : R.tag) ?? "section"), p({
+    return q({
+      isValid: () => v.value
+    }), te(() => {
+      le(() => {
+        _();
+      }), U("update:valid", v.value);
+    }), (e, l) => {
+      var N, P, T;
+      const n = h("lkt-header"), i = h("lkt-field"), d = h("lkt-form", !0), x = h("lkt-table"), ee = h("lkt-button");
+      return typeof e.form == "object" && Object.keys(e.form).length > 0 ? (r(), s(H(((N = e.form.container) == null ? void 0 : N.tag) ?? "section"), p({
         key: 0,
-        class: ["lkt-form-container", (L = e.form.container) == null ? void 0 : L.class]
-      }, (N = e.form.container) == null ? void 0 : N.props), {
-        default: E(() => {
-          var P;
+        class: ["lkt-form-container", (P = e.form.container) == null ? void 0 : P.class]
+      }, (T = e.form.container) == null ? void 0 : T.props), {
+        default: z(() => {
+          var $;
           return [
-            te("form", re, [
-              A.value ? (r(), f(a, H(p({ key: 0 }, e.form.header)), null, 16)) : v("", !0),
-              (r(!0), F(I, null, ne(e.form.items, (o, g) => {
-                var T;
-                return r(), F(I, null, [
-                  o.type === "field" ? (r(), F(I, { key: 0 }, [
-                    X.value ? (r(), f(d, p({
+            ae("form", fe, [
+              J.value ? (r(), s(n, K(p({ key: 0 }, e.form.header)), null, 16)) : k("", !0),
+              (r(!0), B(F, null, ie(e.form.items, (o, w) => {
+                var E;
+                return r(), B(F, null, [
+                  o.type === "field" ? (r(), B(F, { key: 0 }, [
+                    Z.value ? (r(), s(i, p({
                       key: 0,
                       modelValue: u.value[o.key],
-                      "onUpdate:modelValue": (n) => u.value[o.key] = n,
+                      "onUpdate:modelValue": (a) => u.value[o.key] = a,
                       options: o.field.options,
-                      "onUpdate:options": (n) => o.field.options = n,
+                      "onUpdate:options": (a) => o.field.options = a,
                       ref_for: !0
-                    }, o.field, {
+                    }, {
+                      ...o.field,
+                      readMode: () => {
+                        var a;
+                        return t.disabled ? t.disabled : R.value ? R.value : (a = o.field) == null ? void 0 : a.readMode;
+                      }
+                    }, {
                       ref_for: !0,
                       ref_key: "fieldsRefs",
                       ref: V,
-                      key: `${g}-current`,
+                      key: `${w}-current`,
                       onValidating: () => {
-                        s.value.push(o.key);
+                        m.value.push(o.key);
                       },
                       onValidation: () => {
-                        s.value.splice(s.value.indexOf(o.key), 1);
+                        m.value.splice(m.value.indexOf(o.key), 1);
                       },
-                      onValidationStatus: U
-                    }), null, 16, ["modelValue", "onUpdate:modelValue", "options", "onUpdate:options", "onValidating", "onValidation"])) : W.value ? (r(), f(d, p({
+                      onValidationStatus: _
+                    }), null, 16, ["modelValue", "onUpdate:modelValue", "options", "onUpdate:options", "onValidating", "onValidation"])) : Y.value ? (r(), s(i, p({
                       key: 1,
                       modelValue: c.value[o.key],
-                      "onUpdate:modelValue": (n) => c.value[o.key] = n,
+                      "onUpdate:modelValue": (a) => c.value[o.key] = a,
                       options: o.field.options,
-                      "onUpdate:options": (n) => o.field.options = n,
+                      "onUpdate:options": (a) => o.field.options = a,
                       ref_for: !0
-                    }, o.field, {
+                    }, {
+                      ...o.field,
+                      readMode: () => {
+                        var a;
+                        return t.disabled ? t.disabled : L.value ? L.value : (a = o.field) == null ? void 0 : a.readMode;
+                      }
+                    }, {
                       ref_for: !0,
                       ref_key: "fieldsRefs",
                       ref: V,
-                      key: `${g}-modifications`,
+                      key: `${w}-modifications`,
                       onValidating: () => {
-                        s.value.push(o.key);
+                        m.value.push(o.key);
                       },
                       onValidation: () => {
-                        s.value.splice(s.value.indexOf(o.key), 1);
+                        m.value.splice(m.value.indexOf(o.key), 1);
                       },
-                      onValidationStatus: U
-                    }), null, 16, ["modelValue", "onUpdate:modelValue", "options", "onUpdate:options", "onValidating", "onValidation"])) : v("", !0)
-                  ], 64)) : o.type === "field" ? (r(), f(d, p({
+                      onValidationStatus: _
+                    }), null, 16, ["modelValue", "onUpdate:modelValue", "options", "onUpdate:options", "onValidating", "onValidation"])) : k("", !0)
+                  ], 64)) : o.type === "field" ? (r(), s(i, p({
                     key: 1,
                     modelValue: u.value[o.key],
-                    "onUpdate:modelValue": (n) => u.value[o.key] = n,
+                    "onUpdate:modelValue": (a) => u.value[o.key] = a,
                     ref_for: !0
-                  }, o.field, {
+                  }, {
+                    ...o.field,
+                    readMode: () => {
+                      var a;
+                      return t.disabled ? t.disabled : (a = o.field) == null ? void 0 : a.readMode;
+                    }
+                  }, {
                     ref_for: !0,
                     ref_key: "fieldsRefs",
                     ref: V,
-                    key: g,
+                    key: w,
                     onValidating: () => {
-                      s.value.push(o.key);
+                      m.value.push(o.key);
                     },
                     onValidation: () => {
-                      s.value.splice(s.value.indexOf(o.key), 1);
+                      m.value.splice(m.value.indexOf(o.key), 1);
                     },
-                    onValidationStatus: U
-                  }), null, 16, ["modelValue", "onUpdate:modelValue", "onValidating", "onValidation"])) : o.type === "form" ? (r(), f(i, {
+                    onValidationStatus: _
+                  }), null, 16, ["modelValue", "onUpdate:modelValue", "onValidating", "onValidation"])) : o.type === "form" ? (r(), s(d, {
                     modelValue: u.value,
-                    "onUpdate:modelValue": t[0] || (t[0] = (n) => u.value = n),
+                    "onUpdate:modelValue": l[0] || (l[0] = (a) => u.value = a),
                     modifications: c.value,
-                    "onUpdate:modifications": t[1] || (t[1] = (n) => c.value = n),
-                    form: e.form.items[g].form,
+                    "onUpdate:modifications": l[1] || (l[1] = (a) => c.value = a),
+                    form: e.form.items[w].form,
                     "modification-view": e.modificationView,
                     "modification-data-state": e.modificationDataState,
                     ref_for: !0,
                     ref_key: "fieldsRefs",
                     ref: V,
-                    key: g,
-                    "onUpdate:valid": U
-                  }, null, 8, ["modelValue", "modifications", "form", "modification-view", "modification-data-state"])) : o.type === "component" ? (r(), f($((T = o.component) == null ? void 0 : T.tag), p({
+                    key: w,
+                    disabled: e.disabled,
+                    "editable-views": e.editableViews,
+                    "onUpdate:valid": _
+                  }, null, 8, ["modelValue", "modifications", "form", "modification-view", "modification-data-state", "disabled", "editable-views"])) : o.type === "component" ? (r(), s(H((E = o.component) == null ? void 0 : E.tag), p({
                     key: 3,
                     ref_for: !0
                   }, o.component.props, {
                     ref_for: !0,
                     ref_key: "fieldsRefs",
                     ref: V,
-                    key: g
+                    key: w
                   }), {
-                    default: E(() => {
-                      var n;
+                    default: z(() => {
+                      var a;
                       return [
-                        Object.keys((n = o.component) == null ? void 0 : n.form).length > 0 ? (r(), f(i, {
+                        Object.keys((a = o.component) == null ? void 0 : a.form).length > 0 ? (r(), s(d, {
                           key: 0,
                           modelValue: u.value,
-                          "onUpdate:modelValue": t[2] || (t[2] = (B) => u.value = B),
+                          "onUpdate:modelValue": l[2] || (l[2] = (S) => u.value = S),
                           form: o.component.form,
-                          "onUpdate:form": (B) => o.component.form = B
-                        }, null, 8, ["modelValue", "form", "onUpdate:form"])) : v("", !0)
+                          "onUpdate:form": (S) => o.component.form = S
+                        }, null, 8, ["modelValue", "form", "onUpdate:form"])) : k("", !0)
                       ];
                     }),
                     _: 2
-                  }, 1040)) : v("", !0)
+                  }, 1040)) : k("", !0)
                 ], 64);
               }), 256)),
-              O.value.length > 0 ? (r(), f(Y, p({
+              O.value.length > 0 ? (r(), s(x, p({
                 key: 1,
-                modelValue: S.value,
-                "onUpdate:modelValue": t[3] || (t[3] = (o) => S.value = o)
+                modelValue: M.value,
+                "onUpdate:modelValue": l[3] || (l[3] = (o) => M.value = o)
               }, {
-                columns: G
-              }), null, 16, ["modelValue"])) : v("", !0),
-              le(e.$slots, "default"),
-              typeof ((P = e.form) == null ? void 0 : P.submitButton) == "object" && M.value ? (r(), f(Z, H(p({ key: 2 }, M.value)), null, 16)) : v("", !0)
+                columns: Q
+              }), null, 16, ["modelValue"])) : k("", !0),
+              ne(e.$slots, "default"),
+              typeof (($ = e.form) == null ? void 0 : $.submitButton) == "object" && j.value ? (r(), s(ee, K(p({ key: 2 }, j.value)), null, 16)) : k("", !0)
             ])
           ];
         }),
         _: 3
-      }, 16, ["class"])) : v("", !0);
+      }, 16, ["class"])) : k("", !0);
     };
   }
-}), pe = {
-  install: (y) => {
-    y.component("lkt-form") === void 0 && y.component("lkt-form", ue);
+}), Ve = {
+  install: (b) => {
+    b.component("lkt-form") === void 0 && b.component("lkt-form", se);
   }
-}, ce = (y) => {
-  ie(y);
+}, ve = (b) => {
+  re(b);
 };
 export {
-  pe as default,
-  ce as setCanvas
+  Ve as default,
+  ve as setCanvas
 };

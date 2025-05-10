@@ -5,7 +5,9 @@ type __VLS_Props = {
     modifications?: LktObject;
     form: FormConfig;
     valid?: boolean;
+    disabled?: boolean;
     modificationView?: ModificationView;
+    editableViews?: ModificationView[];
     modificationDataState?: DataState;
 };
 declare var __VLS_70: {};
@@ -25,8 +27,10 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     "onUpdate:form"?: ((...args: any[]) => any) | undefined;
     "onUpdate:valid"?: ((...args: any[]) => any) | undefined;
 }>, {
+    disabled: boolean;
     valid: boolean;
     modificationView: ModificationView;
+    editableViews: ModificationView[];
     modificationDataState: DataState;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;

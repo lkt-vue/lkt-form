@@ -16,10 +16,14 @@ const props = withDefaults(defineProps<{
     modifications?: LktObject
     form: FormConfig
     valid?: boolean
+    disabled?: boolean
     modificationView?: ModificationView
+    editableViews?: ModificationView[]
     modificationDataState?: DataState
 }>(), {
     valid: false,
+    disabled: false,
+    editableViews: () => [],
     modificationView: ModificationView.Current,
     modificationDataState: () => new DataState({})
 });
@@ -74,7 +78,7 @@ watch(value, (val) => {
     emit('update:modelValue', val);
 }, {deep: true})
 
-watch(() => props.modifications, (val) => {modificationsValue.value = val;})
+watch(() => props.modifications, (val) => {modificationsValue.value = val;}, {deep: true})
 watch(modificationsValue, (val) => {
     prepareTableData();
     emit('update:modifications', val);
@@ -138,16 +142,28 @@ const computedDifferencesItemIndexes = computed(() => {
     // if (!computedInDifferencesView.value && !computedInSplitView.value) return [];
 
     let r = [];
-    let differencesKeys = props.modificationDataState.getChangedProperties();
     if (computedInSplitView.value) {
         r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), []);
 
     } else if (computedInDifferencesView.value) {
+        let differencesKeys = props.modificationDataState.getChangedProperties();
         r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' && differencesKeys.includes(v.key) ? i : []), []);
     }
     prepareTableData(r);
     return r;
-})
+});
+
+const computedDisabledCurrentView = computed(() => {
+    if (props.editableViews.length === 0) return false;
+    if (props.editableViews.includes(ModificationView.Current)) return false;
+    return true;
+});
+
+const computedDisabledModificationsView = computed(() => {
+    if (props.editableViews.length === 0) return false;
+    if (props.editableViews.includes(ModificationView.Modifications)) return false;
+    return true;
+});
 
 const prepareTableData = (haystack?: Array<number>) => {
     differences.value = [];
@@ -200,7 +216,14 @@ onMounted(() => {
                         v-if="computedInCurrentView"
                         v-model="value[item.key]"
                         v-model:options="item.field.options"
-                        v-bind="item.field"
+                        v-bind="{
+                            ...item.field,
+                            readMode: () => {
+                                if (props.disabled) return props.disabled;
+                                if (computedDisabledCurrentView) return computedDisabledCurrentView;
+                                return item.field?.readMode
+                            }
+                        }"
                         ref="fieldsRefs"
                         :key="`${i}-current`"
                         @validating="() => {remoteValidating.push(item.key)}"
@@ -211,7 +234,14 @@ onMounted(() => {
                         v-else-if="computedInModificationsView"
                         v-model="modificationsValue[item.key]"
                         v-model:options="item.field.options"
-                        v-bind="item.field"
+                        v-bind="{
+                            ...item.field,
+                            readMode: () => {
+                                if (props.disabled) return props.disabled;
+                                if (computedDisabledModificationsView) return computedDisabledModificationsView;
+                                return item.field?.readMode
+                            }
+                        }"
                         ref="fieldsRefs"
                         :key="`${i}-modifications`"
                         @validating="() => {remoteValidating.push(item.key)}"
@@ -222,7 +252,13 @@ onMounted(() => {
                 <template v-else-if="item.type === 'field'">
                     <lkt-field
                         v-model="value[item.key]"
-                        v-bind="item.field"
+                        v-bind="{
+                            ...item.field,
+                            readMode: () => {
+                                if (props.disabled) return props.disabled;
+                                return item.field?.readMode
+                            }
+                        }"
                         ref="fieldsRefs"
                         :key="i"
                         @validating="() => {remoteValidating.push(item.key)}"
@@ -239,6 +275,8 @@ onMounted(() => {
                         :modification-data-state="modificationDataState"
                         ref="fieldsRefs"
                         :key="i"
+                        :disabled="disabled"
+                        :editable-views="editableViews"
                         @update:valid="checkValidForm"
                     />
                 </template>
