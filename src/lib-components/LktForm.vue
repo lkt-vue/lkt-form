@@ -17,14 +17,14 @@ const props = withDefaults(defineProps<{
     form: FormConfig
     valid?: boolean
     disabled?: boolean
-    modificationView?: ModificationView
+    visibleView?: ModificationView
     editableViews?: ModificationView[]
     modificationDataState?: DataState
 }>(), {
     valid: false,
     disabled: false,
     editableViews: () => [],
-    modificationView: ModificationView.Current,
+    visibleView: ModificationView.Current,
     modificationDataState: () => new DataState({})
 });
 
@@ -43,6 +43,11 @@ const isValid = ref(props.valid);
 
 watch(() => props.valid, (val) => {isValid.value = val;})
 watch(isValid, (val) => {emit('update:valid', val);})
+
+const differencesKeys = ref([]);
+watch(() => props.modificationDataState, (v) => {
+    differencesKeys.value = props.modificationDataState.getChangedProperties();
+}, {deep: true})
 
 const checkValidForm = () => {
     let chk = true;
@@ -123,19 +128,19 @@ const differencesColumns = <ColumnConfig[]>[
 ];
 
 const computedInDifferencesView = computed(() => {
-    return props.modificationView === ModificationView.Differences;
+    return props.visibleView === ModificationView.Differences;
 })
 
 const computedInSplitView = computed(() => {
-    return props.modificationView === ModificationView.SplitView;
+    return props.visibleView === ModificationView.SplitView;
 })
 
 const computedInModificationsView = computed(() => {
-    return props.modificationView === ModificationView.Modifications;
+    return props.visibleView === ModificationView.Modifications;
 })
 
 const computedInCurrentView = computed(() => {
-    return props.modificationView === ModificationView.Current;
+    return props.visibleView === ModificationView.Current;
 })
 
 const computedDifferencesItemIndexes = computed(() => {
@@ -146,8 +151,7 @@ const computedDifferencesItemIndexes = computed(() => {
         r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), []);
 
     } else if (computedInDifferencesView.value) {
-        let differencesKeys = props.modificationDataState.getChangedProperties();
-        r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' && differencesKeys.includes(v.key) ? i : []), []);
+        r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' && differencesKeys.value.includes(v.key) ? i : []), []);
     }
     prepareTableData(r);
     return r;
@@ -193,6 +197,7 @@ defineExpose({
 onMounted(() => {
     nextTick(() => {
         checkValidForm();
+        differencesKeys.value = props.modificationDataState.getChangedProperties();
     })
     emit('update:valid', isValid.value);
 })
@@ -271,7 +276,7 @@ onMounted(() => {
                         v-model="value"
                         v-model:modifications="modificationsValue"
                         :form="form.items[i].form"
-                        :modification-view="modificationView"
+                        :visible-view="visibleView"
                         :modification-data-state="modificationDataState"
                         ref="fieldsRefs"
                         :key="i"

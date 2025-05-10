@@ -6,7 +6,7 @@ type __VLS_Props = {
     form: FormConfig;
     valid?: boolean;
     disabled?: boolean;
-    modificationView?: ModificationView;
+    visibleView?: ModificationView;
     editableViews?: ModificationView[];
     modificationDataState?: DataState;
 };
@@ -29,7 +29,7 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
 }>, {
     disabled: boolean;
     valid: boolean;
-    modificationView: ModificationView;
+    visibleView: ModificationView;
     editableViews: ModificationView[];
     modificationDataState: DataState;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
