@@ -239,7 +239,7 @@ const canDisplayItem = (item: FormItemConfig) => {
         <form class="lkt-grid-1">
             <lkt-header v-if="computedHasHeader" v-bind="form.header"/>
 
-            <template v-for="(item, i) in form.items">
+            <template v-for="(item, i) in form.items" :key="`${i}-${item.type}-${item.key}`">
                 <template v-if="item.type === 'field'">
                     <lkt-field
                         v-if="computedInCurrentView && canRenderItem(item)"
@@ -252,7 +252,8 @@ const canDisplayItem = (item: FormItemConfig) => {
                                 if (props.disabled) return props.disabled;
                                 if (computedDisabledCurrentView) return computedDisabledCurrentView;
                                 return item.field?.readMode
-                            }
+                            },
+                            prop: value
                         }"
                         ref="fieldsRefs"
                         :key="`${i}-current`"
@@ -271,7 +272,8 @@ const canDisplayItem = (item: FormItemConfig) => {
                                 if (props.disabled) return props.disabled;
                                 if (computedDisabledModificationsView) return computedDisabledModificationsView;
                                 return item.field?.readMode
-                            }
+                            },
+                            prop: modificationsValue
                         }"
                         ref="fieldsRefs"
                         :key="`${i}-modifications`"
