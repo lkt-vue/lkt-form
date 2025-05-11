@@ -196,6 +196,10 @@ const prepareTableData = (haystack?: Array<number>) => {
                 current: value.value[config.key],
                 modification: modificationsValue.value[config.key],
                 field: config.field,
+                modificationsField: {
+                    ...config.field,
+                    ...config.modificationsField,
+                }
             });
         }
     }
@@ -268,6 +272,7 @@ const canDisplayItem = (item: FormItemConfig) => {
                         v-model:options="item.field.options"
                         v-bind="{
                             ...item.field,
+                            ...item.modificationsField,
                             readMode: () => {
                                 if (props.disabled) return props.disabled;
                                 if (computedDisabledModificationsView) return computedDisabledModificationsView;
