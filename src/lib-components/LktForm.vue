@@ -3,7 +3,8 @@ import {
     ColumnConfig,
     ColumnType,
     extractI18nValue,
-    FormConfig,
+    FormItemConfig,
+    FormUiConfig,
     LktObject,
     ModificationView,
     TableConfig
@@ -11,16 +12,7 @@ import {
 import {computed, nextTick, onMounted, ref, watch} from "vue";
 import {DataState} from "lkt-data-state";
 
-const props = withDefaults(defineProps<{
-    modelValue: LktObject
-    modifications?: LktObject
-    form: FormConfig
-    valid?: boolean
-    disabled?: boolean
-    visibleView?: ModificationView
-    editableViews?: ModificationView[]
-    modificationDataState?: DataState
-}>(), {
+const props = withDefaults(defineProps<FormUiConfig>(), {
     valid: false,
     disabled: false,
     editableViews: () => [],
@@ -112,6 +104,7 @@ const differencesColumns = <ColumnConfig[]>[
         key: 'datum',
         label: 'Datum',
         type: ColumnType.None,
+        isForAccordionHeader: true,
     },
     {
         key: 'current',
@@ -169,6 +162,25 @@ const computedDisabledModificationsView = computed(() => {
     return true;
 });
 
+const computedDifferencesTableConfig = computed(() => {
+    let r:TableConfig = {
+        columns: differencesColumns,
+    }
+
+    if (typeof props.differencesTableConfig === 'function') {
+        return props.differencesTableConfig(r);
+    }
+
+    if (typeof props.differencesTableConfig === 'object' && Object.keys(props.differencesTableConfig).length > 0) {
+        return {
+            ...props.differencesTableConfig,
+            ...r,
+        }
+    }
+
+    return r;
+});
+
 const prepareTableData = (haystack?: Array<number>) => {
     differences.value = [];
 
@@ -202,6 +214,18 @@ onMounted(() => {
     emit('update:valid', isValid.value);
 })
 
+const canRenderItem = (item: FormItemConfig) => {
+    if (typeof item.canRender === 'undefined') return true;
+    if (typeof item.canRender === 'function') return item.canRender();
+    return item.canRender;
+}
+
+const canDisplayItem = (item: FormItemConfig) => {
+    if (typeof item.canDisplay === 'undefined') return true;
+    if (typeof item.canDisplay === 'function') return item.canDisplay();
+    return item.canDisplay;
+}
+
 </script>
 
 <template>
@@ -218,7 +242,8 @@ onMounted(() => {
             <template v-for="(item, i) in form.items">
                 <template v-if="item.type === 'field'">
                     <lkt-field
-                        v-if="computedInCurrentView"
+                        v-if="computedInCurrentView && canRenderItem(item)"
+                        v-show="canDisplayItem(item)"
                         v-model="value[item.key]"
                         v-model:options="item.field.options"
                         v-bind="{
@@ -236,7 +261,8 @@ onMounted(() => {
                         @validation-status="checkValidForm"
                     />
                     <lkt-field
-                        v-else-if="computedInModificationsView"
+                        v-else-if="computedInModificationsView && canRenderItem(item)"
+                        v-show="canDisplayItem(item)"
                         v-model="modificationsValue[item.key]"
                         v-model:options="item.field.options"
                         v-bind="{
@@ -254,40 +280,33 @@ onMounted(() => {
                         @validation-status="checkValidForm"
                     />
                 </template>
-                <template v-else-if="item.type === 'field'">
-                    <lkt-field
-                        v-model="value[item.key]"
-                        v-bind="{
-                            ...item.field,
-                            readMode: () => {
-                                if (props.disabled) return props.disabled;
-                                return item.field?.readMode
-                            }
+                <template v-else-if="item.type === 'form'">
+                    <lkt-form
+                        v-if="canRenderItem(item)"
+                        v-show="canDisplayItem(item)"
+                        v-model="value"
+                        v-model:modifications="modificationsValue"
+                        v-bind="<FormUiConfig>{
+                            form: form.items[i].form,
+                            visibleView,
+                            modificationDataState,
+                            disabled,
+                            editableViews,
+                            differencesTableConfig,
                         }"
                         ref="fieldsRefs"
                         :key="i"
-                        @validating="() => {remoteValidating.push(item.key)}"
-                        @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
-                        @validation-status="checkValidForm"
-                    />
-                </template>
-                <template v-else-if="item.type === 'form'">
-                    <lkt-form
-                        v-model="value"
-                        v-model:modifications="modificationsValue"
-                        :form="form.items[i].form"
-                        :visible-view="visibleView"
-                        :modification-data-state="modificationDataState"
-                        ref="fieldsRefs"
-                        :key="i"
-                        :disabled="disabled"
-                        :editable-views="editableViews"
                         @update:valid="checkValidForm"
                     />
                 </template>
                 <template v-else-if="item.type === 'component'">
-                    <component :is="item.component?.tag" v-bind="item.component.props" ref="fieldsRefs"
-                               :key="i">
+                    <component
+                        v-if="canRenderItem(item)"
+                        v-show="canDisplayItem(item)"
+                        :is="item.component?.tag"
+                        v-bind="item.component.props"
+                        ref="fieldsRefs"
+                        :key="i">
                         <template v-if="Object.keys(item.component?.form).length > 0">
                             <lkt-form v-model="value" v-model:form="item.component.form"/>
                         </template>
@@ -299,7 +318,7 @@ onMounted(() => {
                 <lkt-table
                     v-model="differences"
                     v-bind="<TableConfig>{
-                        columns: differencesColumns,
+                        ...computedDifferencesTableConfig,
                     }"
                 >
                 </lkt-table>

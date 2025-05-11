@@ -1,27 +1,17 @@
-import { FormConfig, LktObject, ModificationView } from "lkt-vue-kernel";
+import { FormUiConfig, ModificationView } from "lkt-vue-kernel";
 import { DataState } from "lkt-data-state";
-type __VLS_Props = {
-    modelValue: LktObject;
-    modifications?: LktObject;
-    form: FormConfig;
-    valid?: boolean;
-    disabled?: boolean;
-    visibleView?: ModificationView;
-    editableViews?: ModificationView[];
-    modificationDataState?: DataState;
-};
-declare var __VLS_70: {};
+declare var __VLS_58: {};
 type __VLS_Slots = {} & {
-    default?: (props: typeof __VLS_70) => any;
+    default?: (props: typeof __VLS_58) => any;
 };
-declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
+declare const __VLS_component: import("vue").DefineComponent<FormUiConfig, {
     isValid: () => boolean;
 }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
     "update:modelValue": (...args: any[]) => void;
     "update:modifications": (...args: any[]) => void;
     "update:form": (...args: any[]) => void;
     "update:valid": (...args: any[]) => void;
-}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+}, string, import("vue").PublicProps, Readonly<FormUiConfig> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     "onUpdate:modifications"?: ((...args: any[]) => any) | undefined;
     "onUpdate:form"?: ((...args: any[]) => any) | undefined;
