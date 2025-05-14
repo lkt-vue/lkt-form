@@ -2,7 +2,7 @@
 import {
     ColumnConfig,
     ColumnType,
-    extractI18nValue,
+    extractI18nValue, FormInstance,
     FormItemConfig,
     FormUiConfig,
     LktObject,
@@ -27,6 +27,11 @@ const emit = defineEmits([
     'update:valid'
 ]);
 
+const formConfig = ref(new FormInstance(props.form));
+watch(() => props.form, v => {
+    formConfig.value = new FormInstance(v);
+}, {deep: true})
+
 const value = ref(props.modelValue);
 const modificationsValue = ref(props.modifications);
 
@@ -44,9 +49,9 @@ watch(() => props.modificationDataState, (v) => {
 const checkValidForm = () => {
     let chk = true;
     let haystack = [];
-    if (!props.form) return;
+    if (!formConfig.value) return;
 
-    haystack = props.form.items.reduce((r, v, i) => r.concat(v.type === 'form' ? i : []), [])
+    haystack = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'form' ? i : []), [])
     if (haystack.length > 0) {
         for (let k in haystack) {
             chk = chk && fieldsRefs.value[haystack[k]].isValid();
@@ -58,7 +63,7 @@ const checkValidForm = () => {
         return;
     }
 
-    haystack = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), [])
+    haystack = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), [])
     if (haystack.length > 0) {
         for (let k in haystack) {
             chk = chk && fieldsRefs.value[haystack[k]].isFormValid();
@@ -69,13 +74,13 @@ const checkValidForm = () => {
     emit('update:valid', chk);
 }
 
-watch(() => props.modelValue, (val) => {value.value = val;})
+// watch(() => props.modelValue, (val) => {value.value = val;})
 watch(value, (val) => {
     prepareTableData();
     emit('update:modelValue', val);
 }, {deep: true})
 
-watch(() => props.modifications, (val) => {modificationsValue.value = val;}, {deep: true})
+// watch(() => props.modifications, (val) => {modificationsValue.value = val;}, {deep: true})
 watch(modificationsValue, (val) => {
     prepareTableData();
     emit('update:modifications', val);
@@ -116,7 +121,7 @@ const differencesColumns = <ColumnConfig[]>[
         key: 'modification',
         label: 'Modification',
         type: ColumnType.Field,
-        field: 'prop:field',
+        field: 'prop:modificationsField',
     }
 ];
 
@@ -141,10 +146,10 @@ const computedDifferencesItemIndexes = computed(() => {
 
     let r = [];
     if (computedInSplitView.value) {
-        r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), []);
+        r = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), []);
 
     } else if (computedInDifferencesView.value) {
-        r = props.form.items.reduce((r, v, i) => r.concat(v.type === 'field' && differencesKeys.value.includes(v.key) ? i : []), []);
+        r = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'field' && differencesKeys.value.includes(v.key) ? i : []), []);
     }
     prepareTableData(r);
     return r;
@@ -189,7 +194,7 @@ const prepareTableData = (haystack?: Array<number>) => {
     if (haystack.length > 0) {
         for (let i in haystack) {
             let index = haystack[i];
-            let config = props.form.items[index];
+            let config = formConfig.value.items[index];
 
             data.push({
                 datum: extractI18nValue(config.field.label),
@@ -234,16 +239,16 @@ const canDisplayItem = (item: FormItemConfig) => {
 
 <template>
     <component
-        v-if="typeof form === 'object' && Object.keys(form).length > 0"
-        :is="form.container?.tag ?? 'section'"
+        v-if="typeof formConfig === 'object' && Object.keys(formConfig).length > 0"
+        :is="formConfig.container?.tag ?? 'section'"
         class="lkt-form-container"
-        :class="form.container?.class"
-        v-bind="form.container?.props"
+        :class="formConfig.container?.class"
+        v-bind="formConfig.container?.props"
     >
         <form class="lkt-grid-1">
-            <lkt-header v-if="computedHasHeader" v-bind="form.header"/>
+            <lkt-header v-if="computedHasHeader" v-bind="formConfig.header"/>
 
-            <template v-for="(item, i) in form.items" :key="`${i}-${item.type}-${item.key}`">
+            <template v-for="(item, i) in formConfig.items" :key="`${i}-${item.type}-${item.key}`">
                 <template v-if="item.type === 'field'">
                     <lkt-field
                         v-if="computedInCurrentView && canRenderItem(item)"
@@ -269,7 +274,7 @@ const canDisplayItem = (item: FormItemConfig) => {
                         v-else-if="computedInModificationsView && canRenderItem(item)"
                         v-show="canDisplayItem(item)"
                         v-model="modificationsValue[item.key]"
-                        v-model:options="item.field.options"
+                        v-model:options="item.modificationsField.options"
                         v-bind="{
                             ...item.field,
                             ...item.modificationsField,
@@ -294,7 +299,7 @@ const canDisplayItem = (item: FormItemConfig) => {
                         v-model="value"
                         v-model:modifications="modificationsValue"
                         v-bind="<FormUiConfig>{
-                            form: form.items[i].form,
+                            form: formConfig.items[i].form,
                             visibleView,
                             modificationDataState,
                             disabled,
