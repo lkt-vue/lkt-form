@@ -1,8 +1,8 @@
 import { FormUiConfig, ModificationView } from "lkt-vue-kernel";
 import { DataState } from "lkt-data-state";
-declare var __VLS_58: {};
+declare var __VLS_86: {};
 type __VLS_Slots = {} & {
-    default?: (props: typeof __VLS_58) => any;
+    default?: (props: typeof __VLS_86) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<FormUiConfig, {
     isValid: () => boolean;

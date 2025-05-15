@@ -1,5 +1,5 @@
-declare namespace De {
-    function install(b: any): void;
+declare namespace Fe {
+    function install(_: any): void;
 }
-declare function _e(b: any): void;
-export { De as default, _e as setCanvas };
+declare function Se(_: any): void;
+export { Fe as default, Se as setCanvas };

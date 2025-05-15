@@ -235,6 +235,25 @@ const canDisplayItem = (item: FormItemConfig) => {
     return item.canDisplay;
 }
 
+const computedFormContainerClassName = computed(() => {
+    let r = [];
+
+    if (formConfig.value?.container.class) r.push(formConfig.value.container.class);
+    if (props.class) r.push(props.class);
+    r.push(`view-is-${props.visibleView}`);
+
+    return r.join(' ');
+})
+
+const computedFormClassName = computed(() => {
+    let r = [];
+
+    if (props.formClass) r.push(props.formClass);
+    else r.push('lkt-grid-1');
+
+    return r.join(' ');
+})
+
 </script>
 
 <template>
@@ -242,55 +261,99 @@ const canDisplayItem = (item: FormItemConfig) => {
         v-if="typeof formConfig === 'object' && Object.keys(formConfig).length > 0"
         :is="formConfig.container?.tag ?? 'section'"
         class="lkt-form-container"
-        :class="formConfig.container?.class"
+        :class="computedFormContainerClassName"
         v-bind="formConfig.container?.props"
     >
-        <form class="lkt-grid-1">
-            <lkt-header v-if="computedHasHeader" v-bind="formConfig.header"/>
+        <lkt-header v-if="computedHasHeader" v-bind="formConfig.header"/>
 
+        <form :class="computedFormClassName">
             <template v-for="(item, i) in formConfig.items" :key="`${i}-${item.type}-${item.key}`">
-                <template v-if="item.type === 'field'">
-                    <lkt-field
-                        v-if="computedInCurrentView && canRenderItem(item)"
-                        v-show="canDisplayItem(item)"
-                        v-model="value[item.key]"
-                        v-model:options="item.field.options"
-                        v-bind="{
-                            ...item.field,
-                            readMode: () => {
-                                if (props.disabled) return props.disabled;
-                                if (computedDisabledCurrentView) return computedDisabledCurrentView;
-                                return item.field?.readMode
-                            },
-                            prop: value
-                        }"
-                        ref="fieldsRefs"
-                        :key="`${i}-current`"
-                        @validating="() => {remoteValidating.push(item.key)}"
-                        @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
-                        @validation-status="checkValidForm"
-                    />
-                    <lkt-field
-                        v-else-if="computedInModificationsView && canRenderItem(item)"
-                        v-show="canDisplayItem(item)"
-                        v-model="modificationsValue[item.key]"
-                        v-model:options="item.modificationsField.options"
-                        v-bind="{
-                            ...item.field,
-                            ...item.modificationsField,
-                            readMode: () => {
-                                if (props.disabled) return props.disabled;
-                                if (computedDisabledModificationsView) return computedDisabledModificationsView;
-                                return item.field?.readMode
-                            },
-                            prop: modificationsValue
-                        }"
-                        ref="fieldsRefs"
-                        :key="`${i}-modifications`"
-                        @validating="() => {remoteValidating.push(item.key)}"
-                        @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
-                        @validation-status="checkValidForm"
-                    />
+                <template v-if="item.type === 'field' && canRenderItem(item)">
+                    <template v-if="computedInCurrentView">
+                        <lkt-field
+                            v-if="Array.isArray(item.field.options)"
+                            v-show="canDisplayItem(item)"
+                            v-model="value[item.key]"
+                            v-model:options="item.field.options"
+                            v-bind="{
+                                ...item.field,
+                                readMode: () => {
+                                    if (props.disabled) return props.disabled;
+                                    if (computedDisabledCurrentView) return computedDisabledCurrentView;
+                                    return item.field?.readMode
+                                },
+                                prop: value
+                            }"
+                            ref="fieldsRefs"
+                            :key="`${i}-current`"
+                            @validating="() => {remoteValidating.push(item.key)}"
+                            @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
+                            @validation-status="checkValidForm"
+                        />
+                        <lkt-field
+                            v-else
+                            v-show="canDisplayItem(item)"
+                            v-model="value[item.key]"
+                            v-bind="{
+                                ...item.field,
+                                readMode: () => {
+                                    if (props.disabled) return props.disabled;
+                                    if (computedDisabledCurrentView) return computedDisabledCurrentView;
+                                    return item.field?.readMode
+                                },
+                                prop: value
+                            }"
+                            ref="fieldsRefs"
+                            :key="`${i}-current-2`"
+                            @validating="() => {remoteValidating.push(item.key)}"
+                            @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
+                            @validation-status="checkValidForm"
+                        />
+                    </template>
+
+                    <template v-if="computedInModificationsView">
+                        <lkt-field
+                            v-if="Array.isArray(item.modificationsField.options)"
+                            v-show="canDisplayItem(item)"
+                            v-model="modificationsValue[item.key]"
+                            v-model:options="item.modificationsField.options"
+                            v-bind="{
+                                ...item.field,
+                                ...item.modificationsField,
+                                readMode: () => {
+                                    if (props.disabled) return props.disabled;
+                                    if (computedDisabledModificationsView) return computedDisabledModificationsView;
+                                    return item.field?.readMode
+                                },
+                                prop: modificationsValue
+                            }"
+                            ref="fieldsRefs"
+                            :key="`${i}-modifications`"
+                            @validating="() => {remoteValidating.push(item.key)}"
+                            @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
+                            @validation-status="checkValidForm"
+                        />
+                        <lkt-field
+                            v-else
+                            v-show="canDisplayItem(item)"
+                            v-model="modificationsValue[item.key]"
+                            v-bind="{
+                                ...item.field,
+                                ...item.modificationsField,
+                                readMode: () => {
+                                    if (props.disabled) return props.disabled;
+                                    if (computedDisabledModificationsView) return computedDisabledModificationsView;
+                                    return item.field?.readMode
+                                },
+                                prop: modificationsValue
+                            }"
+                            ref="fieldsRefs"
+                            :key="`${i}-modifications-2`"
+                            @validating="() => {remoteValidating.push(item.key)}"
+                            @validation="() => {remoteValidating.splice(remoteValidating.indexOf(item.key), 1)}"
+                            @validation-status="checkValidForm"
+                        />
+                    </template>
                 </template>
                 <template v-else-if="item.type === 'form'">
                     <lkt-form
@@ -315,12 +378,24 @@ const canDisplayItem = (item: FormItemConfig) => {
                     <component
                         v-if="canRenderItem(item)"
                         v-show="canDisplayItem(item)"
-                        :is="item.component?.tag"
+                        :is="item.component?.tag ?? 'section'"
                         v-bind="item.component.props"
                         ref="fieldsRefs"
                         :key="i">
-                        <template v-if="Object.keys(item.component?.form).length > 0">
-                            <lkt-form v-model="value" v-model:form="item.component.form"/>
+                        <template v-if="formConfig?.items[i]?.component?.form">
+                            <lkt-form
+                                v-model="value"
+                                v-model:modifications="modificationsValue"
+                                v-bind="<FormUiConfig>{
+                                    form: formConfig.items[i].component.form,
+                                    visibleView,
+                                    modificationDataState,
+                                    disabled,
+                                    editableViews,
+                                    differencesTableConfig,
+                                }"
+                                @update:valid="checkValidForm"
+                            />
                         </template>
                     </component>
                 </template>
