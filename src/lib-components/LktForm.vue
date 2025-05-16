@@ -2,9 +2,10 @@
 import {
     ColumnConfig,
     ColumnType,
-    extractI18nValue, FormInstance,
+    extractI18nValue,
+    FormInstance,
     FormItemConfig,
-    FormUiConfig,
+    FormUiConfig, getFormFieldsKeys,
     LktObject,
     ModificationView,
     TableConfig
@@ -24,16 +25,30 @@ const emit = defineEmits([
     'update:modelValue',
     'update:modifications',
     'update:form',
-    'update:valid'
+    'update:valid',
+    'update:changed'
 ]);
+
+const hasChanges = ref(false);
 
 const formConfig = ref(new FormInstance(props.form));
 watch(() => props.form, v => {
     formConfig.value = new FormInstance(v);
-}, {deep: true})
+}, {deep: true});
 
 const value = ref(props.modelValue);
 const modificationsValue = ref(props.modifications);
+
+const stateControl = ref(new DataState({}, {
+    ...props.dataStateConfig,
+    onlyProps: getFormFieldsKeys(formConfig.value)
+}));
+
+if (props.visibleView === ModificationView.Current) {
+    stateControl.value.increment(value.value).turnStoredIntoOriginal();
+} else {
+    stateControl.value.increment(modificationsValue.value).turnStoredIntoOriginal();
+}
 
 const fieldsRefs = ref(null);
 const isValid = ref(props.valid);
@@ -44,6 +59,11 @@ watch(isValid, (val) => {emit('update:valid', val);})
 const differencesKeys = ref([]);
 watch(() => props.modificationDataState, (v) => {
     differencesKeys.value = props.modificationDataState.getChangedProperties();
+}, {deep: true})
+
+watch(stateControl, (v) => {
+    hasChanges.value = stateControl.value.changed();
+    emit('update:changed', hasChanges.value);
 }, {deep: true})
 
 const checkValidForm = () => {
@@ -76,12 +96,18 @@ const checkValidForm = () => {
 
 // watch(() => props.modelValue, (val) => {value.value = val;})
 watch(value, (val) => {
+    if (props.editableViews[0] === ModificationView.Current) {
+        stateControl.value.increment(value.value);
+    }
     prepareTableData();
     emit('update:modelValue', val);
 }, {deep: true})
 
 // watch(() => props.modifications, (val) => {modificationsValue.value = val;}, {deep: true})
 watch(modificationsValue, (val) => {
+    if (props.editableViews[0] === ModificationView.Current) {
+        stateControl.value.increment(value.value);
+    }
     prepareTableData();
     emit('update:modifications', val);
 }, {deep: true})
@@ -189,6 +215,8 @@ const computedDifferencesTableConfig = computed(() => {
 const prepareTableData = (haystack?: Array<number>) => {
     differences.value = [];
 
+    if (!computedInDifferencesView.value && !computedInSplitView.value) return;
+
     let data: Array<LktObject> = [];
     if (!haystack) haystack = computedDifferencesItemIndexes.value;
     if (haystack.length > 0) {
@@ -238,6 +266,7 @@ const canDisplayItem = (item: FormItemConfig) => {
 const computedFormContainerClassName = computed(() => {
     let r = [];
 
+    if (formConfig.value.uiConfig?.class) r.push(formConfig.value.uiConfig.class);
     if (formConfig.value?.container.class) r.push(formConfig.value.container.class);
     if (props.class) r.push(props.class);
     r.push(`view-is-${props.visibleView}`);
@@ -248,6 +277,7 @@ const computedFormContainerClassName = computed(() => {
 const computedFormClassName = computed(() => {
     let r = [];
 
+    if (formConfig.value.uiConfig?.formClass) r.push(formConfig.value.uiConfig.formClass);
     if (props.formClass) r.push(props.formClass);
     else r.push('lkt-grid-1');
 
@@ -368,6 +398,7 @@ const computedFormClassName = computed(() => {
                             disabled,
                             editableViews,
                             differencesTableConfig,
+                            dataStateConfig,
                         }"
                         ref="fieldsRefs"
                         :key="i"
@@ -393,6 +424,7 @@ const computedFormClassName = computed(() => {
                                     disabled,
                                     editableViews,
                                     differencesTableConfig,
+                                    dataStateConfig,
                                 }"
                                 @update:valid="checkValidForm"
                             />

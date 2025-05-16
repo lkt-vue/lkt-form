@@ -11,11 +11,13 @@ declare const __VLS_component: import("vue").DefineComponent<FormUiConfig, {
     "update:modifications": (...args: any[]) => void;
     "update:form": (...args: any[]) => void;
     "update:valid": (...args: any[]) => void;
+    "update:changed": (...args: any[]) => void;
 }, string, import("vue").PublicProps, Readonly<FormUiConfig> & Readonly<{
     "onUpdate:modelValue"?: ((...args: any[]) => any) | undefined;
     "onUpdate:modifications"?: ((...args: any[]) => any) | undefined;
     "onUpdate:form"?: ((...args: any[]) => any) | undefined;
     "onUpdate:valid"?: ((...args: any[]) => any) | undefined;
+    "onUpdate:changed"?: ((...args: any[]) => any) | undefined;
 }>, {
     disabled: boolean;
     valid: boolean;
