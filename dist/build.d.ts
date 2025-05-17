@@ -1,5 +1,5 @@
-declare namespace Me {
+declare namespace $e {
     function install(F: any): void;
 }
-declare function Te(F: any): void;
-export { Me as default, Te as setCanvas };
+declare function je(F: any): void;
+export { $e as default, je as setCanvas };

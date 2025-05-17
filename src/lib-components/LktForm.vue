@@ -5,13 +5,15 @@ import {
     extractI18nValue,
     FormInstance,
     FormItemConfig,
-    FormUiConfig, getFormFieldsKeys,
+    FormUiConfig, getFormFieldsKeys, getFormSlotKeys,
     LktObject,
     ModificationView,
     TableConfig
 } from "lkt-vue-kernel";
-import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, ref, useSlots, watch} from "vue";
 import {DataState} from "lkt-data-state";
+
+const slots = useSlots();
 
 const props = withDefaults(defineProps<FormUiConfig>(), {
     valid: false,
@@ -284,6 +286,10 @@ const computedFormClassName = computed(() => {
     return r.join(' ');
 })
 
+const computedSlots = computed(() => {
+    return getFormSlotKeys(formConfig.value);
+})
+
 </script>
 
 <template>
@@ -403,7 +409,11 @@ const computedFormClassName = computed(() => {
                         ref="fieldsRefs"
                         :key="i"
                         @update:valid="checkValidForm"
-                    />
+                    >
+                        <template v-for="slot in computedSlots" v-slot:[slot]="{}">
+                            <slot :name="slot"/>
+                        </template>
+                    </lkt-form>
                 </template>
                 <template v-else-if="item.type === 'component'">
                     <component
@@ -427,9 +437,16 @@ const computedFormClassName = computed(() => {
                                     dataStateConfig,
                                 }"
                                 @update:valid="checkValidForm"
-                            />
+                            >
+                                <template v-for="slot in computedSlots" v-slot:[slot]="{}">
+                                    <slot :name="slot"/>
+                                </template>
+                            </lkt-form>
                         </template>
                     </component>
+                </template>
+                <template v-else-if="item.type === 'slot'">
+                    <slot :name="item.key" v-bind="item.slotData ?? {}"/>
                 </template>
             </template>
 
@@ -439,8 +456,7 @@ const computedFormClassName = computed(() => {
                     v-bind="<TableConfig>{
                         ...computedDifferencesTableConfig,
                     }"
-                >
-                </lkt-table>
+                />
             </template>
 
             <slot/>
