@@ -35,7 +35,14 @@ const hasChanges = ref(false);
 
 const formConfig = ref(new FormInstance(props.form));
 watch(() => props.form, v => {
-    formConfig.value = new FormInstance(v);
+
+    const formState = new DataState(formConfig.value);
+    let proposal = new FormInstance(v);
+    formState.increment(proposal);
+
+    if (formState.changed()) {
+        formConfig.value = proposal;
+    }
 }, {deep: true});
 
 const value = ref(props.modelValue);
@@ -76,7 +83,9 @@ const checkValidForm = () => {
     haystack = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'form' ? i : []), [])
     if (haystack.length > 0) {
         for (let k in haystack) {
-            chk = chk && fieldsRefs.value[haystack[k]].isValid();
+            if (typeof fieldsRefs.value[haystack[k]] !== 'undefined' && typeof fieldsRefs.value[haystack[k]].isValid === 'function') {
+                chk = chk && fieldsRefs.value[haystack[k]].isValid();
+            }
         }
     }
 
@@ -88,7 +97,9 @@ const checkValidForm = () => {
     haystack = formConfig.value.items.reduce((r, v, i) => r.concat(v.type === 'field' ? i : []), [])
     if (haystack.length > 0) {
         for (let k in haystack) {
-            chk = chk && fieldsRefs.value[haystack[k]].isFormValid();
+            if (typeof fieldsRefs.value[haystack[k]] !== 'undefined' && typeof fieldsRefs.value[haystack[k]].isFormValid === 'function') {
+                chk = chk && fieldsRefs.value[haystack[k]].isFormValid();
+            }
         }
     }
 
@@ -96,7 +107,9 @@ const checkValidForm = () => {
     emit('update:valid', chk);
 }
 
-// watch(() => props.modelValue, (val) => {value.value = val;})
+// watch(() => props.modelValue, (v) => {
+//     value.value = v;
+// }, {deep: true})
 watch(value, (val) => {
     if (props.editableViews[0] === ModificationView.Current) {
         stateControl.value.increment(value.value);
@@ -105,7 +118,7 @@ watch(value, (val) => {
     emit('update:modelValue', val);
 }, {deep: true})
 
-// watch(() => props.modifications, (val) => {modificationsValue.value = val;}, {deep: true})
+// watch(() => props.modifications, (v) => {modificationsValue.value = v;}, {deep: true})
 watch(modificationsValue, (val) => {
     if (props.editableViews[0] === ModificationView.Current) {
         stateControl.value.increment(value.value);
@@ -243,14 +256,18 @@ const prepareTableData = (haystack?: Array<number>) => {
 
 defineExpose({
     isValid: () => isValid.value,
+    turnStoredIntoOriginal: () => {
+        stateControl.value.turnStoredIntoOriginal();
+    }
 })
 
 onMounted(() => {
     nextTick(() => {
         checkValidForm();
         differencesKeys.value = props.modificationDataState.getChangedProperties();
+        emit('update:valid', isValid.value);
+        emit('update:changed', hasChanges.value);
     })
-    emit('update:valid', isValid.value);
 })
 
 const canRenderItem = (item: FormItemConfig) => {
@@ -290,6 +307,8 @@ const computedSlots = computed(() => {
     return getFormSlotKeys(formConfig.value);
 })
 
+const onSubmit = () => {}
+
 </script>
 
 <template>
@@ -299,12 +318,13 @@ const computedSlots = computed(() => {
         class="lkt-form-container"
         :class="computedFormContainerClassName"
         v-bind="formConfig.container?.props"
+        @submit.prevent.stop="onSubmit"
     >
         <lkt-header v-if="computedHasHeader" v-bind="formConfig.header"/>
 
         <form :class="computedFormClassName">
             <template v-for="(item, i) in formConfig.items" :key="`${i}-${item.type}-${item.key}`">
-                <template v-if="item.type === 'field' && canRenderItem(item)">
+                <template v-if="item.type === 'field' && (canRenderItem(item))">
                     <template v-if="computedInCurrentView">
                         <lkt-field
                             v-if="Array.isArray(item.field.options)"
@@ -415,7 +435,7 @@ const computedSlots = computed(() => {
                         </template>
                     </lkt-form>
                 </template>
-                <template v-else-if="item.type === 'component'">
+                <template v-else-if="item.type === 'component' && canRenderItem(item)">
                     <component
                         v-if="canRenderItem(item)"
                         v-show="canDisplayItem(item)"
@@ -445,7 +465,7 @@ const computedSlots = computed(() => {
                         </template>
                     </component>
                 </template>
-                <template v-else-if="item.type === 'slot'">
+                <template v-else-if="item.type === 'slot' && (canRenderItem(item))">
                     <slot :name="item.key" v-bind="item.slotData ?? {}"/>
                 </template>
             </template>
