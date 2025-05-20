@@ -120,8 +120,8 @@ watch(value, (val) => {
 
 // watch(() => props.modifications, (v) => {modificationsValue.value = v;}, {deep: true})
 watch(modificationsValue, (val) => {
-    if (props.editableViews[0] === ModificationView.Current) {
-        stateControl.value.increment(value.value);
+    if (props.editableViews[0] === ModificationView.Modifications) {
+        stateControl.value.increment(modificationsValue.value);
     }
     prepareTableData();
     emit('update:modifications', val);

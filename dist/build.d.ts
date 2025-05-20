@@ -1,5 +1,5 @@
 declare namespace je {
-    function install(_: any): void;
+    function install(M: any): void;
 }
-declare function Be(_: any): void;
+declare function Be(M: any): void;
 export { je as default, Be as setCanvas };
