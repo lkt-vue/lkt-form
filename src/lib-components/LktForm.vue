@@ -50,7 +50,7 @@ const modificationsValue = ref(props.modifications);
 
 const stateControl = ref(new DataState({}, {
     ...props.dataStateConfig,
-    onlyProps: getFormFieldsKeys(formConfig.value)
+    onlyProps: props.dataStateConfig?.onlyProps ? [...props.dataStateConfig?.onlyProps, ...getFormFieldsKeys(formConfig.value)] : getFormFieldsKeys(formConfig.value)
 }));
 
 if (props.visibleView === ModificationView.Current) {
