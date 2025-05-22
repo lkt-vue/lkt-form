@@ -1,6 +1,6 @@
-import { defineComponent as Se, useSlots as he, ref as k, watch as D, computed as s, onMounted as De, nextTick as Fe, resolveComponent as O, createBlock as y, createCommentVNode as b, openBlock as r, resolveDynamicComponent as ne, mergeProps as m, withModifiers as Ue, withCtx as A, createElementVNode as Me, normalizeProps as ie, normalizeClass as _e, createElementBlock as F, renderSlot as N, Fragment as U, renderList as z, withDirectives as T, vShow as R, createSlots as re } from "vue";
-import { ModificationView as g, FormInstance as ue, getFormFieldsKeys as de, ColumnType as E, extractI18nValue as Ie, getFormSlotKeys as Te, setModalCanvas as Re } from "lkt-vue-kernel";
-import { DataState as q } from "lkt-data-state";
+import { defineComponent as Se, useSlots as he, ref as k, watch as D, computed as s, onMounted as De, nextTick as Fe, resolveComponent as O, createBlock as y, createCommentVNode as b, openBlock as r, resolveDynamicComponent as ne, mergeProps as m, withModifiers as Ue, withCtx as A, createElementVNode as Me, normalizeProps as ie, normalizeClass as _e, createElementBlock as F, renderSlot as N, Fragment as U, renderList as q, withDirectives as T, vShow as R, createSlots as re } from "vue";
+import { ModificationView as g, FormInstance as ue, getFormFieldsKeys as de, ColumnType as G, extractI18nValue as Ie, getFormSlotKeys as Te, setModalCanvas as Re } from "lkt-vue-kernel";
+import { DataState as J } from "lkt-data-state";
 const $e = /* @__PURE__ */ Se({
   __name: "LktForm",
   props: {
@@ -14,7 +14,7 @@ const $e = /* @__PURE__ */ Se({
     formClass: {},
     visibleView: { default: g.Current },
     editableViews: { default: () => [] },
-    modificationDataState: { default: () => new q({}) },
+    modificationDataState: { default: () => new J({}) },
     differencesTableConfig: {},
     dataStateConfig: {}
   },
@@ -30,11 +30,11 @@ const $e = /* @__PURE__ */ Se({
     he();
     const o = M, C = se, H = k(!1), n = k(new ue(o.form));
     D(() => o.form, (e) => {
-      const t = new q(n.value);
+      const t = new J(n.value);
       let i = new ue(e);
       t.increment(i), t.changed() && (n.value = i);
     }, { deep: !0 });
-    const u = k(o.modelValue), d = k(o.modifications), w = k(new q({}, {
+    const u = k(o.modelValue), d = k(o.modifications), w = k(new J({}, {
       ...o.dataStateConfig,
       onlyProps: (Y = o.dataStateConfig) != null && Y.onlyProps ? [...(Z = o.dataStateConfig) == null ? void 0 : Z.onlyProps, ...de(n.value)] : de(n.value)
     }));
@@ -68,11 +68,11 @@ const $e = /* @__PURE__ */ Se({
       }
     };
     D(u, (e) => {
-      o.editableViews[0] === g.Current && w.value.increment(u.value), L(), C("update:modelValue", e);
+      o.editableViews[0] === g.Current && w.value.increment(u.value), E(), C("update:modelValue", e);
     }, { deep: !0 }), D(d, (e) => {
-      o.editableViews[0] === g.Modifications && w.value.increment(d.value), L(), C("update:modifications", e);
+      o.editableViews[0] === g.Modifications && w.value.increment(d.value), E(), C("update:modifications", e);
     }, { deep: !0 });
-    const ce = s(() => !S.value), G = s(() => {
+    const ce = s(() => !S.value), Q = s(() => {
       var e;
       return o.form ? {
         ...(e = o.form) == null ? void 0 : e.submitButton,
@@ -85,24 +85,24 @@ const $e = /* @__PURE__ */ Se({
       {
         key: "datum",
         label: "Datum",
-        type: E.None,
+        type: G.None,
         isForAccordionHeader: !0
       },
       {
         key: "current",
         label: "Current",
-        type: E.Field,
+        type: G.Field,
         field: "prop:field"
       },
       {
         key: "modification",
         label: "Modification",
-        type: E.Field,
+        type: G.Field,
         field: "prop:modificationsField"
       }
-    ], J = s(() => o.visibleView === g.Differences), Q = s(() => o.visibleView === g.SplitView), me = s(() => o.visibleView === g.Modifications), ye = s(() => o.visibleView === g.Current), W = s(() => {
+    ], L = s(() => o.visibleView === g.Differences), z = s(() => o.visibleView === g.SplitView), me = s(() => o.visibleView === g.Modifications), ye = s(() => o.visibleView === g.Current), W = s(() => {
       let e = [];
-      return Q.value ? e = n.value.items.reduce((t, i, f) => t.concat(i.type === "field" ? f : []), []) : J.value && (e = n.value.items.reduce((t, i, f) => t.concat(i.type === "field" && K.value.includes(i.key) ? f : []), [])), L(e), e;
+      return z.value ? e = n.value.items.reduce((t, i, f) => t.concat(i.type === "field" ? f : []), []) : L.value && (e = n.value.items.reduce((t, i, f) => t.concat(i.type === "field" && K.value.includes(i.key) ? f : []), [])), E(e), e;
     }), B = s(() => !(o.editableViews.length === 0 || o.editableViews.includes(g.Current))), P = s(() => !(o.editableViews.length === 0 || o.editableViews.includes(g.Modifications))), Ve = s(() => {
       let e = {
         columns: ve
@@ -111,8 +111,8 @@ const $e = /* @__PURE__ */ Se({
         ...o.differencesTableConfig,
         ...e
       } : e;
-    }), L = (e) => {
-      if (j.value = [], !J.value && !Q.value) return;
+    }), E = (e) => {
+      if (j.value = [], !L.value && !z.value) return;
       let t = [];
       if (e || (e = W.value), e.length > 0)
         for (let i in e) {
@@ -146,6 +146,7 @@ const $e = /* @__PURE__ */ Se({
       return (t = n.value.uiConfig) != null && t.class && e.push(n.value.uiConfig.class), (i = n.value) != null && i.container.class && e.push(n.value.container.class), o.class && e.push(o.class), e.push(`view-is-${o.visibleView}`), e.join(" ");
     }), be = s(() => {
       var t;
+      if (L.value || z.value) return "lkt-grid-1";
       let e = [];
       return (t = n.value.uiConfig) != null && t.formClass && e.push(n.value.uiConfig.formClass), o.formClass ? e.push(o.formClass) : e.push("lkt-grid-1"), e.join(" ");
     }), X = s(() => Te(n.value)), ge = () => {
@@ -166,7 +167,7 @@ const $e = /* @__PURE__ */ Se({
             Me("form", {
               class: _e(be.value)
             }, [
-              (r(!0), F(U, null, z(n.value.items, (a, V) => {
+              (r(!0), F(U, null, q(n.value.items, (a, V) => {
                 var oe;
                 return r(), F(U, {
                   key: `${V}-${a.type}-${a.key}`
@@ -311,7 +312,7 @@ const $e = /* @__PURE__ */ Se({
                       key: V,
                       "onUpdate:valid": h
                     }), re({ _: 2 }, [
-                      z(X.value, (l) => ({
+                      q(X.value, (l) => ({
                         name: l,
                         fn: A(({}) => [
                           N(e.$slots, l)
@@ -349,7 +350,7 @@ const $e = /* @__PURE__ */ Se({
                             differencesTableConfig: e.differencesTableConfig,
                             dataStateConfig: e.dataStateConfig
                           }, { "onUpdate:valid": h }), re({ _: 2 }, [
-                            z(X.value, (I) => ({
+                            q(X.value, (I) => ({
                               name: I,
                               fn: A(({}) => [
                                 N(e.$slots, I)
@@ -376,7 +377,7 @@ const $e = /* @__PURE__ */ Se({
                 ...Ve.value
               }), null, 16, ["modelValue"])) : b("", !0),
               N(e.$slots, "default"),
-              typeof ((ae = e.form) == null ? void 0 : ae.submitButton) == "object" && G.value ? (r(), y(we, ie(m({ key: 1 }, G.value)), null, 16)) : b("", !0)
+              typeof ((ae = e.form) == null ? void 0 : ae.submitButton) == "object" && Q.value ? (r(), y(we, ie(m({ key: 1 }, Q.value)), null, 16)) : b("", !0)
             ], 2)
           ];
         }),

@@ -294,6 +294,9 @@ const computedFormContainerClassName = computed(() => {
 })
 
 const computedFormClassName = computed(() => {
+
+    if (computedInDifferencesView.value || computedInSplitView.value) return 'lkt-grid-1';
+
     let r = [];
 
     if (formConfig.value.uiConfig?.formClass) r.push(formConfig.value.uiConfig.formClass);
@@ -324,7 +327,7 @@ const onSubmit = () => {}
 
         <form :class="computedFormClassName">
             <template v-for="(item, i) in formConfig.items" :key="`${i}-${item.type}-${item.key}`">
-                <template v-if="item.type === 'field' && (canRenderItem(item))">
+                <template v-if="item.type === 'field' && canRenderItem(item)">
                     <template v-if="computedInCurrentView">
                         <lkt-field
                             v-if="Array.isArray(item.field.options)"
@@ -465,7 +468,7 @@ const onSubmit = () => {}
                         </template>
                     </component>
                 </template>
-                <template v-else-if="item.type === 'slot' && (canRenderItem(item))">
+                <template v-else-if="item.type === 'slot' && canRenderItem(item)">
                     <slot :name="item.key" v-bind="item.slotData ?? {}"/>
                 </template>
             </template>
